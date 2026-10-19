@@ -1,59 +1,37 @@
-// Перед запуском необходимо заполнить столбец «Прогноз» в отчёте.
-// Блоки независимы: повторяющиеся имена не конфликтуют.
+const card = document.querySelector("#lab-card");
+const button = document.querySelector("#lab-button");
+const title = document.querySelector("#lab-title");
+const list = document.querySelector("#lab-list");
+const log = document.querySelector("#lab-log");
+const initialItems = list.querySelectorAll("li");
+let counter = 1;
+let eventNumber = 0;
 
-console.log("Эксперимент 1. Параметры и возвращаемое значение");
-{
-  function sum(a, b) {
-    return a + b;
-  }
-  console.log(sum(2, 3));
-  console.log(sum("2", 3));
-}
+console.log("Отсутствующий элемент:", document.querySelector("#absent"));
+console.log("Пустая коллекция:", document.querySelectorAll(".absent").length);
+console.log("dataset.taskId:", button.dataset.taskId, typeof button.dataset.taskId);
+console.log("Числовой id:", Number(button.dataset.taskId));
+console.log("Исходная длина NodeList:", initialItems.length);
 
-console.log("Эксперимент 2. Тело стрелочной функции");
-{
-  // Здесь намеренно пропущен return. Исправление входит в задание 1.
-  const square = (value) => {
-    return value * value;
-  };
-  console.log(square(4));
+function record(event) {
+    eventNumber += 1;
+    const targetId = event.target instanceof Element ? event.target.id : "не Element";
+    const entry = `${eventNumber}. phase=${event.eventPhase}; target=${targetId}; currentTarget=${event.currentTarget.id}`;
+    console.log(entry);
+    log.textContent += `\n${entry}`;
 }
+card.addEventListener("click", record, { capture: true });
+button.addEventListener("click", (event) => {
+    record(event);
+    title.textContent = "<strong>Это текст, а не HTML</strong>";
+});
+card.addEventListener("click", record);
 
-console.log("Эксперимент 3. Два имени одного объекта");
-{
-  const product = { name: "Папка", stock: 3 };
-  const alias = product;
-  alias.stock = 5;
-  console.log(product.stock);
-  console.log(product === alias);
-}
-
-console.log("Эксперимент 4. Копия массива с объектом");
-{
-  const products = [{ name: "Папка", stock: 3 }];
-  const copy = [...products];
-  copy[0].stock = 7;
-  console.log(products[0].stock);
-  console.log(products === copy);
-  console.log(products[0] === copy[0]);
-}
-
-console.log("Эксперимент 5. Копия объекта и порядок свойств");
-{
-  const product = { name: "Папка", stock: 3 };
-  const first = { ...product, stock: 8 };
-  const second = { stock: 8, ...product };
-  console.log(product.stock, first.stock, second.stock);
-  console.log(product === first);
-}
-
-console.log("Эксперимент 6. Параметр по умолчанию");
-{
-  function makeCaption(text = "Без названия") {
-    return text;
-  }
-  console.log(makeCaption());
-  console.log(makeCaption(undefined));
-  console.log(makeCaption(null));
-  console.log(makeCaption(""));
-}
+document.querySelector("#append-button").addEventListener("click", () => {
+    counter += 1;
+    const item = document.createElement("li");
+    item.textContent = `Запись ${counter}`;
+    list.append(item);
+    console.log("Старый NodeList:", initialItems.length);
+    console.log("Новый querySelectorAll:", list.querySelectorAll("li").length);
+});

@@ -4,8 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node src/main.js",
-    "examples": "node examples/functions-and-references.js",
-    "check": "node checks.js"
+    "start": "node tools/serve.mjs",
+    "check:service": "node checks/service.checks.js"
   }
 }

@@ -24,24 +24,89 @@ elements.datasetLabel.textContent = isVariant
     : "Общий контрольный набор";
 
 function renderApp() {
-    // TODO: отобрать видимые задачи; обновить список, общую сводку и пустое состояние.
-    // TODO: для кнопок фильтра обновить is-active и aria-pressed.
-    // Не изменять currentTasks и не добавлять обработчики событий в этой функции.
-    throw new Error("Не реализовано: renderApp");
+    const visibleTasks = getVisibleTasks(currentTasks, currentFilter);
+
+    renderTaskList(elements.list, visibleTasks);
+    renderSummary(elements.summary, currentTasks, visibleTasks.length);
+    renderEmptyState(elements.empty, currentTasks.length, visibleTasks.length);
+
+    for (const button of elements.filters.querySelectorAll("button[data-filter]")) {
+        const isActive = button.dataset.filter === currentFilter;
+        button.classList.toggle("is-active", isActive);
+        button.setAttribute("aria-pressed", String(isActive));
+    }
 }
 
 function handleTaskListClick(event) {
-    // TODO: найти кнопку через closest(), проверить её принадлежность списку.
-    // TODO: распознать toggle/delete; прочитать и проверить числовой id карточки.
-    // TODO: вызвать функцию ПР2, разобрать ok/error, сохранить успешный результат.
-    // TODO: renderApp(), затем restoreTaskFocus(id, action).
-    throw new Error("Не реализовано: handleTaskListClick");
+    if (!(event.target instanceof Element)) {
+        return;
+    }
+
+    const button = event.target.closest("button[data-action]");
+    if (!button || !elements.list.contains(button)) {
+        return;
+    }
+
+    const action = button.dataset.action;
+    if (action !== "toggle" && action !== "delete") {
+        return;
+    }
+
+    const card = button.closest("li[data-task-id]");
+    if (!card) {
+        return;
+    }
+
+    const id = Number(card.dataset.taskId);
+    if (!Number.isSafeInteger(id) || id <= 0) {
+        elements.message.textContent = "Некорректный идентификатор задачи.";
+        return;
+    }
+
+    const task = findTaskById(currentTasks, id);
+    if (!task) {
+        elements.message.textContent = `Задача с идентификатором ${id} не найдена.`;
+        return;
+    }
+
+    let result;
+    if (action === "toggle") {
+        // Статус берём из данных, а не из текста кнопки/класса.
+        result = setTaskCompleted(currentTasks, id, !task.completed);
+    } else {
+        result = removeTask(currentTasks, id);
+    }
+
+    if (!result.ok) {
+        elements.message.textContent = result.error;
+        return;
+    }
+
+    currentTasks = result.tasks;
+    elements.message.textContent = "";
+    renderApp();
+    restoreTaskFocus(id, action);
 }
 
 function handleFilterClick(event) {
-    // TODO: найти кнопку фильтра, проверить all/pending/completed.
-    // TODO: изменить только currentFilter, очистить сообщение и вызвать renderApp().
-    throw new Error("Не реализовано: handleFilterClick");
+    if (!(event.target instanceof Element)) {
+        return;
+    }
+
+    // closest — чтобы нажатие на вложенный span тоже работало.
+    const button = event.target.closest("button[data-filter]");
+    if (!button || !elements.filters.contains(button)) {
+        return;
+    }
+
+    const filter = button.dataset.filter;
+    if (filter !== "all" && filter !== "pending" && filter !== "completed") {
+        return;
+    }
+
+    currentFilter = filter;
+    elements.message.textContent = "";
+    renderApp();
 }
 
 // Готовая вспомогательная функция. Сохраняет понятную позицию клавиатурного фокуса

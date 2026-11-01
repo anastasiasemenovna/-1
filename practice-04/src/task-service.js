@@ -195,3 +195,42 @@ export function removeTask(tasks, id) {
 
     return { ok: true, tasks: nextTasks };
 }
+
+/**
+ * Обновляет название и приоритет выбранной задачи.
+ * Меняются только title и priority; id и completed сохраняются.
+ * Исходный массив и его объекты не изменяются.
+ */
+export function updateTask(tasks, id, title, priority) {
+    const idError = validateId(id);
+    if (idError) {
+        return idError;
+    }
+
+    const titleResult = validateTitle(title);
+    if (!titleResult.ok) {
+        return titleResult;
+    }
+
+    if (priority !== "low" && priority !== "medium" && priority !== "high") {
+        return {
+            ok: false,
+            error: 'Приоритет должен быть "low", "medium" или "high".',
+        };
+    }
+
+    const exists = tasks.some((task) => task.id === id);
+    if (!exists) {
+        return { ok: false, error: "Задача с указанным идентификатором не найдена." };
+    }
+
+    // map + spread: изменённая запись — новый объект,
+    // id и completed берутся из исходной задачи, поэтому статус не сбрасывается.
+    const nextTasks = tasks.map((task) =>
+        task.id === id
+            ? { ...task, title: titleResult.title, priority }
+            : task
+    );
+
+    return { ok: true, tasks: nextTasks };
+}

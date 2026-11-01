@@ -18,8 +18,7 @@ export function createTaskElement(task) {
 
     const title = document.createElement("h3");
     title.className = "task-title";
-    // Ключевое требование: текст, а не HTML.
-    title.textContent = task.title;
+    title.textContent = task.title;           // безопасный вывод, не innerHTML
     li.append(title);
 
     const status = document.createElement("p");
@@ -44,6 +43,15 @@ export function createTaskElement(task) {
     toggleLabel.textContent = "Выполнена";
     toggle.append(toggleLabel);
     actions.append(toggle);
+
+    const edit = document.createElement("button");
+    edit.type = "button";
+    edit.dataset.action = "edit";
+    const editLabel = document.createElement("span");
+    editLabel.className = "action-label";
+    editLabel.textContent = "Изменить";
+    edit.append(editLabel);
+    actions.append(edit);
 
     const remove = document.createElement("button");
     remove.type = "button";
